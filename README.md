@@ -5,10 +5,15 @@
 
 ## Technologies Used
 JavaScript (JS)
+
 Node.js
+
 Serverless framework
+
 AWS SDK
+
 Bootstrap
+
 AWS CLI
 
 ## Getting Started

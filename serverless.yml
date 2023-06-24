@@ -1,0 +1,120 @@
+service: visitor-track-app
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  profile: cyberberry
+  stage: dev
+  region: us-west-1
+  environment: 
+    DYNAMODB_TABLE_NAME: ${self:custom.visitorsTableName}
+    TOKENS_TABLE_NAME: ${self:custom.tokensTableName}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: "*"
+
+custom:
+  visitorsTableName: visitors-table-${self:provider.stage}
+  tokensTableName: tokens-table-${self:provider.stage}
+
+functions:
+  authorizerAnyToken:
+        handler: lambdas/authorizers/anyToken.handler
+  getVisitor:
+    handler: lambdas/endpoints/getVisitor.handler
+    name: get-visitor
+    events:
+      - http:
+          path: visitors/{visitorId}
+          method: GET
+          cors: true
+          authorizer:
+                      name: authorizerAnyToken
+                      type: request
+                      identitySource: method.request.header.X-Amz-Security-Token
+  addVisitor:
+    handler: lambdas/endpoints/addVisitor.handler
+    name: add-visitor
+    events:
+      - http:
+          path: visitors
+          method: POST
+          cors: true
+          authorizer:
+                      name: authorizerAnyToken
+                      type: request
+                      identitySource: method.request.header.X-Amz-Security-Token
+  updateVisitor:
+    handler: lambdas/endpoints/updateVisitor.handler
+    name: update-visitor
+    events:
+      - http:
+          path: visitors/{visitorId}
+          method: PUT
+          cors: true
+          authorizer:
+                      name: authorizerAnyToken
+                      type: request
+                      identitySource: method.request.header.X-Amz-Security-Token
+  deleteVisitor:
+    handler: lambdas/endpoints/deleteVisitor.handler
+    name: delete-visitor
+    events:
+      - http:
+          path: visitors/{visitorId}
+          method: DELETE
+          cors: true
+          authorizer:
+                      name: authorizerAnyToken
+                      type: request
+                      identitySource: method.request.header.X-Amz-Security-Token
+  getAllVisitors:
+    handler: lambdas/endpoints/getAllVisitors.handler
+    name: get-all-visitors
+    events:
+      - http:
+          path: visitors
+          method: GET
+          cors: true
+          authorizer:
+                      name: authorizerAnyToken
+                      type: request
+                      identitySource: method.request.header.X-Amz-Security-Token
+
+resources:
+  Resources:  
+    VisitorsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.visitorsTableName}
+        AttributeDefinitions:
+          - AttributeName: visitorId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: visitorId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    TokenTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tokensTableName}
+        AttributeDefinitions:
+           - AttributeName: tokenId
+             AttributeType: S
+        KeySchema:
+          - AttributeName: tokenId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5

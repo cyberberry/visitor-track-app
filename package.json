@@ -1,0 +1,20 @@
+{
+  "name": "visitor-track",
+  "version": "1.0.0",
+  "description": "A simple serverless crud app for tracking visitors.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Oleksandra Davydova",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.354.0",
+    "@aws-sdk/util-dynamodb": "^3.354.0",
+    "dotenv": "^16.3.1",
+    "moment": "^2.29.4",
+    "moment-timezone": "^0.5.43",
+    "serverless-s3-sync": "^3.1.0",
+    "uuid": "^9.0.0"
+  }
+}
